@@ -1,0 +1,59 @@
+@import "tailwindcss";
+
+:root {
+  --fay-black: #0a0a0a;
+  --fay-surface: #141414;
+  --fay-surface-2: #1c1c1c;
+  --fay-white: #ffffff;
+  --fay-gray: #a3a3a3;
+  --fay-accent: #8b5cf6;
+  --fay-accent-dark: #6d28d9;
+  --fay-accent-light: #c9a8fa;
+  --fay-accent-tint: #1b1424;
+  --fay-border: rgba(255, 255, 255, 0.1);
+}
+
+@theme inline {
+  --color-fay-black: var(--fay-black);
+  --color-fay-surface: var(--fay-surface);
+  --color-fay-surface-2: var(--fay-surface-2);
+  --color-fay-white: var(--fay-white);
+  --color-fay-gray: var(--fay-gray);
+  --color-fay-accent: var(--fay-accent);
+  --color-fay-accent-dark: var(--fay-accent-dark);
+  --color-fay-accent-light: var(--fay-accent-light);
+  --color-fay-accent-tint: var(--fay-accent-tint);
+}
+
+body {
+  background: var(--fay-black);
+  color: var(--fay-white);
+}
+
+::selection {
+  background: var(--fay-accent);
+  color: var(--fay-white);
+}
+
+/* Foco visible y consistente para navegación por teclado */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--fay-accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Respeta la preferencia del sistema de reducir animaciones */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
