@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useOfertasActivas } from "@/hooks/useOfertasActivas";
 import { usePrefiereMenosMovimiento } from "@/lib/useMotionSeguro";
+import { optimizarImagen } from "@/lib/imagenes";
+import { LinkButton } from "@/components/ui/Button";
 
 const AUTOPLAY_MS = 5000;
 
@@ -56,7 +58,7 @@ export default function OfertasBanner() {
                         className="grid items-center gap-4 p-5 md:grid-cols-[auto_1fr_auto] md:p-6"
                     >
                         <div className="relative hidden h-16 w-24 overflow-hidden rounded-lg md:block">
-                            <img src={oferta.imagen} alt="" className="h-full w-full object-cover" />
+                            <img src={optimizarImagen(oferta.imagen, { ancho: 150 })} alt="" className="h-full w-full object-cover" />
                         </div>
 
                         <div className="flex items-center gap-3">
@@ -76,12 +78,13 @@ export default function OfertasBanner() {
                             >
                                 Ver más
                             </Link>
-                            <Link
+                            <LinkButton
                                 to={oferta.categoriaRelacionada ? `/productos?categoria=${oferta.categoriaRelacionada}` : "/productos"}
-                                className="w-fit rounded-lg bg-fay-accent px-4 py-2 text-xs font-medium text-fay-accent-tint transition-transform hover:scale-[1.03] md:text-sm"
+                                size="sm"
+                                className="w-fit"
                             >
                                 Ver oferta
-                            </Link>
+                            </LinkButton>
                         </div>
                     </motion.div>
                 </AnimatePresence>

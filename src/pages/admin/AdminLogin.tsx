@@ -1,6 +1,9 @@
 import { useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useAuthStore } from "@/store/useAuthStore";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 import logoFay from "@/assets/logo-fay.png";
 
 export default function AdminLogin() {
@@ -28,6 +31,10 @@ export default function AdminLogin() {
 
     return (
         <main className="flex min-h-screen items-center justify-center bg-fay-black px-5 text-white">
+            <Helmet>
+                <title>Panel admin · FAY</title>
+                <meta name="robots" content="noindex, nofollow" />
+            </Helmet>
             <div className="w-full max-w-sm">
                 <div className="mb-8 text-center">
                     <img src={logoFay} alt="FAY" className="mx-auto h-12 w-12 object-contain" />
@@ -35,38 +42,30 @@ export default function AdminLogin() {
                 </div>
 
                 <form onSubmit={manejarSubmit} className="space-y-4 rounded-xl border border-fay-border bg-fay-surface p-6">
-                    <div>
-                        <label className="mb-1.5 block text-xs text-fay-gray">Email</label>
-                        <input
-                            required
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="admin@fay.com"
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-4 py-2.5 text-sm outline-none focus:border-fay-accent"
-                        />
-                    </div>
-                    <div>
-                        <label className="mb-1.5 block text-xs text-fay-gray">Contraseña</label>
-                        <input
-                            required
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="••••••••"
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-4 py-2.5 text-sm outline-none focus:border-fay-accent"
-                        />
-                    </div>
+                    <Input
+                        label="Email"
+                        required
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="admin@fay.com"
+                        className="bg-fay-black px-4 py-2.5"
+                    />
+                    <Input
+                        label="Contraseña"
+                        required
+                        type="password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        placeholder="••••••••"
+                        className="bg-fay-black px-4 py-2.5"
+                    />
 
-                    {error && <p className="text-xs text-fay-accent-light">{error}</p>}
+                    {error && <p className="text-xs text-fay-danger-light">{error}</p>}
 
-                    <button
-                        type="submit"
-                        disabled={cargando}
-                        className="w-full rounded-lg bg-fay-accent py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.01] disabled:opacity-60"
-                    >
+                    <Button type="submit" loading={cargando} fullWidth>
                         {cargando ? "Ingresando..." : "Iniciar sesión"}
-                    </button>
+                    </Button>
                 </form>
             </div>
         </main>

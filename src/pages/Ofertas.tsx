@@ -1,3 +1,4 @@
+import { Helmet } from "react-helmet-async";
 import { BadgePercent } from "lucide-react";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import OfertaCard from "@/components/ui/OfertaCard";
@@ -8,6 +9,10 @@ export default function Ofertas() {
 
     return (
         <main className="mx-auto max-w-7xl px-5 py-12 md:px-8">
+            <Helmet>
+                <title>Ofertas · FAY</title>
+                <meta name="description" content="Descuentos y promociones activas por tiempo limitado en ropa deportiva para mujer." />
+            </Helmet>
             <Breadcrumbs items={[{ label: "Inicio", to: "/" }, { label: "Ofertas" }]} />
 
             <h1 className="mt-3 text-3xl font-semibold">Ofertas</h1>

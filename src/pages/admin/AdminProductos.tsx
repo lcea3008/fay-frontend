@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useProductosAdminStore } from "@/store/useProductosAdminStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { formatearPrecio } from "@/lib/utils";
+import { optimizarImagen } from "@/lib/imagenes";
+import { Button } from "@/components/ui/Button";
 import ProductoFormModal from "@/components/admin/ProductoFormModal";
 import { confirmarAccion } from "@/store/useConfirmStore";
 import type { Producto } from "@/types";
@@ -48,6 +51,9 @@ export default function AdminProductos() {
 
     return (
         <div>
+            <Helmet>
+                <title>Productos · Panel admin</title>
+            </Helmet>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">Productos</h1>
@@ -55,16 +61,13 @@ export default function AdminProductos() {
                         {cargando ? "Cargando..." : `${productos.length} productos en catálogo`}
                     </p>
                 </div>
-                <button
-                    onClick={abrirNuevo}
-                    className="flex items-center gap-2 self-start rounded-lg bg-fay-accent px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.02] sm:self-auto"
-                >
+                <Button size="sm" onClick={abrirNuevo} className="self-start sm:self-auto">
                     <Plus size={16} />
                     Nuevo producto
-                </button>
+                </Button>
             </div>
 
-            {error && <p className="mt-3 text-xs text-fay-accent-light">{error}</p>}
+            {error && <p className="mt-3 text-xs text-fay-danger-light">{error}</p>}
 
             <div className="mt-6 overflow-hidden rounded-xl border border-fay-border">
                 <div className="overflow-x-auto">
@@ -83,14 +86,14 @@ export default function AdminProductos() {
                                 <tr key={producto.id} className="border-b border-fay-border last:border-0">
                                     <td className="px-4 py-3">
                                         <div className="flex items-center gap-3">
-                                            <img src={producto.imagenes[0]} alt={producto.nombre} className="h-10 w-8 shrink-0 rounded object-cover" />
+                                            <img src={optimizarImagen(producto.imagenes[0], { ancho: 60 })} alt={producto.nombre} className="h-10 w-8 shrink-0 rounded object-cover" />
                                             {producto.nombre}
                                         </div>
                                     </td>
                                     <td className="px-4 py-3 text-fay-gray">{producto.categoria}</td>
                                     <td className="px-4 py-3">{formatearPrecio(producto.precioOferta ?? producto.precio)}</td>
                                     <td className="px-4 py-3">
-                                        <span className={producto.stock === 0 ? "text-fay-accent-light" : ""}>{producto.stock}</span>
+                                        <span className={producto.stock === 0 ? "text-fay-danger-light" : ""}>{producto.stock}</span>
                                     </td>
                                     <td className="px-4 py-3">
                                         <div className="flex justify-end gap-3">
@@ -99,7 +102,7 @@ export default function AdminProductos() {
                                             </button>
                                             <button
                                                 onClick={() => manejarEliminar(producto)}
-                                                className="text-fay-gray hover:text-fay-accent-light"
+                                                className="text-fay-gray hover:text-fay-danger-light"
                                             >
                                                 <Trash2 size={15} />
                                             </button>

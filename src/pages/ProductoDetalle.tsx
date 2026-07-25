@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { useProducto } from "@/hooks/useProducto";
 import { useCartStore } from "@/store/useCartStore";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Chip from "@/components/ui/Chip";
+import Badge from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { formatearPrecio, cn } from "@/lib/utils";
+import { optimizarImagen } from "@/lib/imagenes";
 
 export default function ProductoDetalle() {
     const { slug } = useParams<{ slug: string }>();
@@ -11,16 +16,23 @@ export default function ProductoDetalle() {
     const agregarItem = useCartStore((s) => s.agregarItem);
 
     const [imagenActiva, setImagenActiva] = useState(0);
+    const [imagenColorActivo, setImagenColorActivo] = useState<string | null>(null);
     const [tallaSeleccionada, setTallaSeleccionada] = useState<string | null>(null);
     const [colorSeleccionado, setColorSeleccionado] = useState<string | null>(null);
     const [error, setError] = useState("");
 
     useEffect(() => {
         setImagenActiva(0);
+        setImagenColorActivo(null);
         setTallaSeleccionada(null);
         setColorSeleccionado(null);
         setError("");
     }, [producto?.id]);
+
+    const manejarSeleccionColor = (nombre: string, imagen?: string | null) => {
+        setColorSeleccionado(nombre);
+        setImagenColorActivo(imagen || null);
+    };
 
     if (cargando) {
         return (
@@ -41,6 +53,10 @@ export default function ProductoDetalle() {
     if (!producto) {
         return (
             <main className="mx-auto max-w-7xl px-5 py-20 text-center md:px-8">
+                <Helmet>
+                    <title>Producto no encontrado · FAY</title>
+                    <meta name="robots" content="noindex" />
+                </Helmet>
                 <p className="text-fay-gray">Producto no encontrado.</p>
                 <Link to="/productos" className="mt-4 inline-block text-sm text-fay-accent-light">
                     Volver a productos
@@ -62,8 +78,30 @@ export default function ProductoDetalle() {
         agregarItem(producto, tallaSeleccionada, colorSeleccionado);
     };
 
+    const descripcionMeta =
+        producto.descripcion.length > 155 ? `${producto.descripcion.slice(0, 155)}…` : producto.descripcion;
+
+    const jsonLd = {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        name: producto.nombre,
+        description: producto.descripcion,
+        image: producto.imagenes,
+        offers: {
+            "@type": "Offer",
+            priceCurrency: "PEN",
+            price: producto.precioOferta ?? producto.precio,
+            availability: agotado ? "https://schema.org/OutOfStock" : "https://schema.org/InStock",
+        },
+    };
+
     return (
         <main className="mx-auto max-w-7xl px-5 py-12 md:px-8">
+            <Helmet>
+                <title>{producto.nombre} · FAY</title>
+                <meta name="description" content={descripcionMeta} />
+                <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
+            </Helmet>
             <Breadcrumbs
                 items={[
                     { label: "Inicio", to: "/" },
@@ -76,7 +114,7 @@ export default function ProductoDetalle() {
                 <div>
                     <div className="aspect-[3/4] overflow-hidden rounded-2xl bg-fay-surface">
                         <img
-                            src={producto.imagenes[imagenActiva]}
+                            src={optimizarImagen(imagenColorActivo ?? producto.imagenes[imagenActiva], { ancho: 800 })}
                             alt={producto.nombre}
                             className={cn("h-full w-full object-cover", agotado && "opacity-60")}
                         />
@@ -87,14 +125,24 @@ export default function ProductoDetalle() {
                             {producto.imagenes.map((img, i) => (
                                 <button
                                     key={img + i}
-                                    onClick={() => setImagenActiva(i)}
+                                    onClick={() => {
+                                        setImagenColorActivo(null);
+                                        setImagenActiva(i);
+                                    }}
                                     aria-label={`Ver imagen ${i + 1}`}
                                     className={cn(
                                         "h-16 w-14 shrink-0 overflow-hidden rounded-lg border-2 transition-colors",
-                                        i === imagenActiva ? "border-fay-accent" : "border-transparent opacity-70 hover:opacity-100"
+                                        !imagenColorActivo && i === imagenActiva
+                                            ? "border-fay-accent"
+                                            : "border-transparent opacity-70 hover:opacity-100"
                                     )}
                                 >
-                                    <img src={img} alt="" className="h-full w-full object-cover" />
+                                    <img
+                                        src={optimizarImagen(img, { ancho: 100, alto: 100 })}
+                                        alt=""
+                                        loading="lazy"
+                                        className="h-full w-full object-cover"
+                                    />
                                 </button>
                             ))}
                         </div>
@@ -103,9 +151,9 @@ export default function ProductoDetalle() {
 
                 <div>
                     {agotado && (
-                        <span className="mb-2 inline-block rounded-md bg-fay-surface-2 px-2 py-1 text-[10px] font-medium tracking-wide text-fay-gray">
+                        <Badge variant="muted" className="mb-2 inline-block">
                             AGOTADO
-                        </span>
+                        </Badge>
                     )}
                     <h1 className="text-2xl font-semibold md:text-3xl">{producto.nombre}</h1>
                     <div className="mt-2 flex items-center gap-2">
@@ -119,7 +167,7 @@ export default function ProductoDetalle() {
                         )}
                     </div>
                     {pocoStock && (
-                        <p className="mt-2 text-xs text-fay-accent-light">¡Solo quedan {producto.stock} unidades!</p>
+                        <p className="mt-2 text-xs text-fay-danger-light">¡Solo quedan {producto.stock} unidades!</p>
                     )}
                     <p className="mt-4 text-sm leading-relaxed text-fay-gray">{producto.descripcion}</p>
 
@@ -127,18 +175,13 @@ export default function ProductoDetalle() {
                         <p className="mb-2 text-xs text-fay-gray">Talla</p>
                         <div className="flex flex-wrap gap-2">
                             {producto.tallas.map((talla) => (
-                                <button
+                                <Chip
                                     key={talla}
+                                    active={tallaSeleccionada === talla}
                                     onClick={() => setTallaSeleccionada(talla)}
-                                    className={cn(
-                                        "rounded-lg border px-3 py-1.5 text-sm transition-colors",
-                                        tallaSeleccionada === talla
-                                            ? "border-fay-accent bg-fay-accent text-white"
-                                            : "border-fay-border text-fay-gray hover:border-fay-accent/50"
-                                    )}
                                 >
                                     {talla}
-                                </button>
+                                </Chip>
                             ))}
                         </div>
                     </div>
@@ -149,7 +192,7 @@ export default function ProductoDetalle() {
                             {producto.colores.map((color) => (
                                 <button
                                     key={color.nombre}
-                                    onClick={() => setColorSeleccionado(color.nombre)}
+                                    onClick={() => manejarSeleccionColor(color.nombre, color.imagen)}
                                     aria-label={color.nombre}
                                     className={cn(
                                         "h-8 w-8 rounded-full border-2 transition-all",
@@ -161,20 +204,17 @@ export default function ProductoDetalle() {
                         </div>
                     </div>
 
-                    {error && <p className="mt-4 text-xs text-fay-accent-light">{error}</p>}
+                    {error && <p className="mt-4 text-xs text-fay-danger-light">{error}</p>}
 
-                    <button
+                    <Button
                         onClick={manejarAgregar}
                         disabled={agotado}
-                        className={cn(
-                            "mt-8 w-full rounded-lg py-3 text-sm font-medium transition-transform md:w-auto md:px-10",
-                            agotado
-                                ? "cursor-not-allowed bg-fay-surface-2 text-fay-gray"
-                                : "bg-fay-accent text-white hover:scale-[1.01]"
-                        )}
+                        size="lg"
+                        fullWidth
+                        className={cn("mt-8 md:w-auto md:px-10", agotado && "bg-fay-surface-2 text-fay-gray")}
                     >
                         {agotado ? "Agotado" : "Agregar al carrito"}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </main>

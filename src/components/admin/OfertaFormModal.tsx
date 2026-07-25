@@ -6,6 +6,9 @@ import { useAuthStore } from "@/store/useAuthStore";
 import { subirImagen } from "@/lib/uploads";
 import { mostrarToast } from "@/store/useToastStore";
 import { formatearPrecio } from "@/lib/utils";
+import { optimizarImagen } from "@/lib/imagenes";
+import { Input, Textarea, Select } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
     ofertaInicial?: Oferta;
@@ -97,52 +100,44 @@ export default function OfertaFormModal({ ofertaInicial, onGuardar, onCerrar }: 
                 </div>
 
                 <form onSubmit={manejarSubmit} className="space-y-3">
-                    <div>
-                        <label className="mb-1 block text-xs text-fay-gray">Título</label>
-                        <input
-                            required
-                            value={form.titulo}
-                            onChange={(e) => setForm({ ...form, titulo: e.target.value })}
-                            placeholder="-20% en leggings seamless"
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                        />
-                    </div>
+                    <Input
+                        label="Título"
+                        required
+                        value={form.titulo}
+                        onChange={(e) => setForm({ ...form, titulo: e.target.value })}
+                        placeholder="-20% en leggings seamless"
+                        className="bg-fay-black"
+                    />
 
-                    <div>
-                        <label className="mb-1 block text-xs text-fay-gray">Descripción</label>
-                        <textarea
-                            required
-                            rows={2}
-                            value={form.descripcion}
-                            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                        />
-                    </div>
+                    <Textarea
+                        label="Descripción"
+                        required
+                        rows={2}
+                        value={form.descripcion}
+                        onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                        className="bg-fay-black"
+                    />
 
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="mb-1 block text-xs text-fay-gray">Precio (S/)</label>
-                            <input
-                                required
-                                type="number"
-                                min={0}
-                                step="0.01"
-                                value={form.precio}
-                                onChange={(e) => setForm({ ...form, precio: Number(e.target.value) })}
-                                className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                            />
-                        </div>
-                        <div>
-                            <label className="mb-1 block text-xs text-fay-gray">Descuento (%)</label>
-                            <input
-                                type="number"
-                                min={0}
-                                max={100}
-                                value={form.descuento}
-                                onChange={(e) => setForm({ ...form, descuento: Number(e.target.value) })}
-                                className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                            />
-                        </div>
+                        <Input
+                            label="Precio (S/)"
+                            required
+                            type="number"
+                            min={0}
+                            step="0.01"
+                            value={form.precio}
+                            onChange={(e) => setForm({ ...form, precio: Number(e.target.value) })}
+                            className="bg-fay-black"
+                        />
+                        <Input
+                            label="Descuento (%)"
+                            type="number"
+                            min={0}
+                            max={100}
+                            value={form.descuento}
+                            onChange={(e) => setForm({ ...form, descuento: Number(e.target.value) })}
+                            className="bg-fay-black"
+                        />
                     </div>
 
                     {form.precio > 0 && form.descuento > 0 && (
@@ -153,53 +148,47 @@ export default function OfertaFormModal({ ofertaInicial, onGuardar, onCerrar }: 
                     )}
 
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="mb-1 block text-xs text-fay-gray">Fecha inicio</label>
-                            <input
-                                required
-                                type="date"
-                                min={hoyISO()}
-                                value={fechaInicioVal}
-                                onChange={(e) => {
-                                    const nuevaInicio = e.target.value;
-                                    setForm((f) => ({
-                                        ...f,
-                                        fechaInicio: new Date(nuevaInicio).toISOString(),
-                                        // si la fecha fin quedó antes de la nueva fecha inicio, la ajustamos
-                                        fechaFin:
-                                            new Date(f.fechaFin) < new Date(nuevaInicio)
-                                                ? new Date(nuevaInicio).toISOString()
-                                                : f.fechaFin,
-                                    }));
-                                }}
-                                className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent [color-scheme:dark]"
-                            />
-                        </div>
-                        <div>
-                            <label className="mb-1 block text-xs text-fay-gray">Fecha fin</label>
-                            <input
-                                required
-                                type="date"
-                                min={fechaInicioVal}
-                                value={fechaFinVal}
-                                onChange={(e) => setForm({ ...form, fechaFin: new Date(e.target.value).toISOString() })}
-                                className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent [color-scheme:dark]"
-                            />
-                        </div>
+                        <Input
+                            label="Fecha inicio"
+                            required
+                            type="date"
+                            min={hoyISO()}
+                            value={fechaInicioVal}
+                            onChange={(e) => {
+                                const nuevaInicio = e.target.value;
+                                setForm((f) => ({
+                                    ...f,
+                                    fechaInicio: new Date(nuevaInicio).toISOString(),
+                                    // si la fecha fin quedó antes de la nueva fecha inicio, la ajustamos
+                                    fechaFin:
+                                        new Date(f.fechaFin) < new Date(nuevaInicio)
+                                            ? new Date(nuevaInicio).toISOString()
+                                            : f.fechaFin,
+                                }));
+                            }}
+                            className="bg-fay-black [color-scheme:dark]"
+                        />
+                        <Input
+                            label="Fecha fin"
+                            required
+                            type="date"
+                            min={fechaInicioVal}
+                            value={fechaFinVal}
+                            onChange={(e) => setForm({ ...form, fechaFin: new Date(e.target.value).toISOString() })}
+                            className="bg-fay-black [color-scheme:dark]"
+                        />
                     </div>
 
-                    <div>
-                        <label className="mb-1 block text-xs text-fay-gray">Categoría relacionada</label>
-                        <select
-                            value={form.categoriaRelacionada}
-                            onChange={(e) => setForm({ ...form, categoriaRelacionada: e.target.value })}
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                        >
-                            {categorias.map((c) => (
-                                <option key={c.slug} value={c.slug}>{c.nombre}</option>
-                            ))}
-                        </select>
-                    </div>
+                    <Select
+                        label="Categoría relacionada"
+                        value={form.categoriaRelacionada}
+                        onChange={(e) => setForm({ ...form, categoriaRelacionada: e.target.value })}
+                        className="bg-fay-black"
+                    >
+                        {categorias.map((c) => (
+                            <option key={c.slug} value={c.slug}>{c.nombre}</option>
+                        ))}
+                    </Select>
 
                     {/* Selector de imagen: link o archivo (igual que en Productos) */}
                     <div>
@@ -252,7 +241,7 @@ export default function OfertaFormModal({ ofertaInicial, onGuardar, onCerrar }: 
 
                         {form.imagen && (
                             <div className="mt-2 h-16 w-24 overflow-hidden rounded-lg bg-fay-black">
-                                <img src={form.imagen} alt="Vista previa" className="h-full w-full object-cover" />
+                                <img src={optimizarImagen(form.imagen, { ancho: 150 })} alt="Vista previa" className="h-full w-full object-cover" />
                             </div>
                         )}
                     </div>
@@ -273,13 +262,9 @@ export default function OfertaFormModal({ ofertaInicial, onGuardar, onCerrar }: 
                         </select>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={subiendoImagen}
-                        className="mt-2 w-full rounded-lg bg-fay-accent py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
+                    <Button type="submit" disabled={subiendoImagen} fullWidth className="mt-2">
                         Guardar oferta
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>

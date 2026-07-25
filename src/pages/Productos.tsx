@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { Search, X, SearchX } from "lucide-react";
 import ProductCard from "@/components/ui/ProductCard";
 import ProductCardSkeleton from "@/components/ui/ProductCardSkeleton";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Chip from "@/components/ui/Chip";
+import { Select } from "@/components/ui/Input";
 import { useProductos } from "@/hooks/useProductos";
 import { useCategorias } from "@/hooks/useCategorias";
-import { cn } from "@/lib/utils";
 
 type Orden = "" | "precio-asc" | "precio-desc";
 
@@ -21,8 +23,6 @@ export default function Productos() {
         buscar: busqueda || undefined,
     });
 
-    const [tallasSeleccionadas, setTallasSeleccionadas] = useState<string[]>([]);
-    const [coloresSeleccionados, setColoresSeleccionados] = useState<string[]>([]);
     const [orden, setOrden] = useState<Orden>("");
     const [inputBusqueda, setInputBusqueda] = useState(busqueda);
 
@@ -55,39 +55,9 @@ export default function Productos() {
         setSearchParams(params);
     };
 
-    const toggleTalla = (talla: string) => {
-        setTallasSeleccionadas((prev) =>
-            prev.includes(talla) ? prev.filter((t) => t !== talla) : [...prev, talla]
-        );
-    };
-
-    const toggleColor = (nombre: string) => {
-        setColoresSeleccionados((prev) =>
-            prev.includes(nombre) ? prev.filter((c) => c !== nombre) : [...prev, nombre]
-        );
-    };
-
-    const tallasDisponibles = useMemo(() => {
-        const set = new Set<string>();
-        productos.forEach((p) => p.tallas.forEach((t) => set.add(t)));
-        return Array.from(set).sort();
-    }, [productos]);
-
-    const coloresDisponibles = useMemo(() => {
-        const mapa = new Map<string, string>();
-        productos.forEach((p) => p.colores.forEach((c) => mapa.set(c.nombre, c.hex)));
-        return Array.from(mapa.entries());
-    }, [productos]);
-
     const productosFiltrados = useMemo(() => {
         let resultado = productos;
 
-        if (tallasSeleccionadas.length > 0) {
-            resultado = resultado.filter((p) => p.tallas.some((t) => tallasSeleccionadas.includes(t)));
-        }
-        if (coloresSeleccionados.length > 0) {
-            resultado = resultado.filter((p) => p.colores.some((c) => coloresSeleccionados.includes(c.nombre)));
-        }
         if (orden === "precio-asc") {
             resultado = [...resultado].sort(
                 (a, b) => (a.precioOferta ?? a.precio) - (b.precioOferta ?? b.precio)
@@ -99,21 +69,31 @@ export default function Productos() {
         }
 
         return resultado;
-    }, [productos, tallasSeleccionadas, coloresSeleccionados, orden]);
+    }, [productos, orden]);
 
     const categoriaNombre = categorias.find((c) => c.slug === categoriaActiva)?.nombre;
-    const hayFiltrosExtra =
-        tallasSeleccionadas.length > 0 || coloresSeleccionados.length > 0 || busqueda.length > 0;
+    const hayFiltrosExtra = busqueda.length > 0;
 
     const limpiarFiltros = () => {
-        setTallasSeleccionadas([]);
-        setColoresSeleccionados([]);
         setInputBusqueda("");
-        seleccionarCategoria("");
+        setSearchParams(new URLSearchParams());
     };
+
+    const tituloPagina = categoriaNombre ? `${categoriaNombre} · FAY` : busqueda ? `"${busqueda}" · FAY` : "Productos · FAY";
 
     return (
         <main className="mx-auto max-w-7xl px-5 py-12 md:px-8">
+            <Helmet>
+                <title>{tituloPagina}</title>
+                <meta
+                    name="description"
+                    content={
+                        categoriaNombre
+                            ? `Comprá ${categoriaNombre.toLowerCase()} para mujer en FAY — envío por WhatsApp.`
+                            : "Todo el catálogo de ropa deportiva para mujer: leggings, tops, conjuntos y más."
+                    }
+                />
+            </Helmet>
             <Breadcrumbs
                 items={[
                     { label: "Inicio", to: "/" },
@@ -144,81 +124,15 @@ export default function Productos() {
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-                <button
-                    onClick={() => seleccionarCategoria("")}
-                    className={cn(
-                        "rounded-lg border px-3 py-1.5 text-sm transition-colors",
-                        !categoriaActiva
-                            ? "border-fay-accent bg-fay-accent text-white"
-                            : "border-fay-border text-fay-gray hover:border-fay-accent/50"
-                    )}
-                >
+                <Chip active={!categoriaActiva} onClick={() => seleccionarCategoria("")}>
                     Todos
-                </button>
+                </Chip>
                 {categorias.map((c) => (
-                    <button
-                        key={c.slug}
-                        onClick={() => seleccionarCategoria(c.slug)}
-                        className={cn(
-                            "rounded-lg border px-3 py-1.5 text-sm transition-colors",
-                            categoriaActiva === c.slug
-                                ? "border-fay-accent bg-fay-accent text-white"
-                                : "border-fay-border text-fay-gray hover:border-fay-accent/50"
-                        )}
-                    >
+                    <Chip key={c.slug} active={categoriaActiva === c.slug} onClick={() => seleccionarCategoria(c.slug)}>
                         {c.nombre}
-                    </button>
+                    </Chip>
                 ))}
             </div>
-
-            {(tallasDisponibles.length > 0 || coloresDisponibles.length > 0) && (
-                <div className="mt-4 flex flex-wrap items-start gap-x-8 gap-y-3">
-                    {tallasDisponibles.length > 0 && (
-                        <div>
-                            <p className="mb-1.5 text-xs text-fay-gray">Talla</p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {tallasDisponibles.map((talla) => (
-                                    <button
-                                        key={talla}
-                                        onClick={() => toggleTalla(talla)}
-                                        className={cn(
-                                            "rounded-md border px-2.5 py-1 text-xs transition-colors",
-                                            tallasSeleccionadas.includes(talla)
-                                                ? "border-fay-accent bg-fay-accent text-white"
-                                                : "border-fay-border text-fay-gray hover:border-fay-accent/50"
-                                        )}
-                                    >
-                                        {talla}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    {coloresDisponibles.length > 0 && (
-                        <div>
-                            <p className="mb-1.5 text-xs text-fay-gray">Color</p>
-                            <div className="flex flex-wrap gap-1.5">
-                                {coloresDisponibles.map(([nombre, hex]) => (
-                                    <button
-                                        key={nombre}
-                                        onClick={() => toggleColor(nombre)}
-                                        aria-label={nombre}
-                                        title={nombre}
-                                        className={cn(
-                                            "h-6 w-6 rounded-full border-2 transition-all",
-                                            coloresSeleccionados.includes(nombre)
-                                                ? "border-fay-accent scale-110"
-                                                : "border-fay-border"
-                                        )}
-                                        style={{ backgroundColor: hex }}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
 
             <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-sm text-fay-gray">
@@ -232,18 +146,18 @@ export default function Productos() {
                     )}
                 </p>
 
-                <select
+                <Select
                     value={orden}
                     onChange={(e) => setOrden(e.target.value as Orden)}
-                    className="rounded-lg border border-fay-border bg-fay-surface px-3 py-1.5 text-sm text-white outline-none focus:border-fay-accent"
+                    className="w-auto py-1.5"
                 >
                     <option value="">Más recientes</option>
                     <option value="precio-asc">Precio: menor a mayor</option>
                     <option value="precio-desc">Precio: mayor a menor</option>
-                </select>
+                </Select>
             </div>
 
-            {error && <p className="mt-4 text-sm text-fay-accent-light">{error}</p>}
+            {error && <p className="mt-4 text-sm text-fay-danger-light">{error}</p>}
 
             {cargando ? (
                 <div className="mt-6 grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">

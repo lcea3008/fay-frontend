@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Navigate, Outlet, Link, useNavigate, useLocation } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
-import { LayoutDashboard, Shirt, Tag, BadgePercent, TrendingUp, LogOut, Menu, X } from "lucide-react";
+import { LayoutDashboard, Shirt, Tag, BadgePercent, TrendingUp, Settings, LogOut, Menu, X } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
 import ToastContainer from "@/components/ui/ToastContainer";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
@@ -13,6 +14,7 @@ const NAV_ITEMS = [
     { to: "/fay-admin-access/categorias", label: "Categorías", icon: Tag },
     { to: "/fay-admin-access/ofertas", label: "Ofertas", icon: BadgePercent },
     { to: "/fay-admin-access/populares", label: "Populares", icon: TrendingUp },
+    { to: "/fay-admin-access/configuracion", label: "Configuración", icon: Settings },
 ];
 
 export default function AdminLayout() {
@@ -33,6 +35,9 @@ export default function AdminLayout() {
 
     return (
         <div className="flex min-h-screen flex-col bg-fay-black text-white md:flex-row">
+            <Helmet>
+                <meta name="robots" content="noindex, nofollow" />
+            </Helmet>
             {/* Barra superior + menú desplegable, solo mobile */}
             <div className="flex items-center justify-between border-b border-fay-border px-4 py-3 md:hidden">
                 <div className="flex items-center gap-2">

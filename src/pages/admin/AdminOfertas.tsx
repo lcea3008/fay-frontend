@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useOfertasAdminStore } from "@/store/useOfertasAdminStore";
 import { useAuthStore } from "@/store/useAuthStore";
 import { formatearPrecio, ofertaEstaActiva } from "@/lib/utils";
+import { optimizarImagen } from "@/lib/imagenes";
+import { Button } from "@/components/ui/Button";
 import OfertaFormModal from "@/components/admin/OfertaFormModal";
 import { confirmarAccion } from "@/store/useConfirmStore";
 import type { Oferta } from "@/types";
@@ -14,7 +17,7 @@ function estadoOferta(oferta: Oferta): { texto: string; clase: string } {
 
     if (!activa && ahora < inicio) return { texto: "Próxima", clase: "text-fay-gray" };
     if (!activa) return { texto: "Expirada", clase: "text-fay-gray" };
-    return { texto: "Activa", clase: "text-fay-accent-light" };
+    return { texto: "Activa", clase: "text-emerald-400" };
 }
 
 export default function AdminOfertas() {
@@ -58,6 +61,9 @@ export default function AdminOfertas() {
 
     return (
         <div>
+            <Helmet>
+                <title>Ofertas · Panel admin</title>
+            </Helmet>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">Ofertas</h1>
@@ -65,16 +71,13 @@ export default function AdminOfertas() {
                         {cargando ? "Cargando..." : "Gestiona las ofertas temporales que se muestran en el Home."}
                     </p>
                 </div>
-                <button
-                    onClick={abrirNueva}
-                    className="flex items-center gap-2 self-start rounded-lg bg-fay-accent px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.02] sm:self-auto"
-                >
+                <Button size="sm" onClick={abrirNueva} className="self-start sm:self-auto">
                     <Plus size={16} />
                     Nueva oferta
-                </button>
+                </Button>
             </div>
 
-            {error && <p className="mt-3 text-xs text-fay-accent-light">{error}</p>}
+            {error && <p className="mt-3 text-xs text-fay-danger-light">{error}</p>}
 
             <div className="mt-6 overflow-hidden rounded-xl border border-fay-border">
                 <div className="overflow-x-auto">
@@ -95,7 +98,7 @@ export default function AdminOfertas() {
                                     <tr key={oferta.id} className="border-b border-fay-border last:border-0">
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-3">
-                                                <img src={oferta.imagen} alt="" className="h-10 w-14 shrink-0 rounded object-cover" />
+                                                <img src={optimizarImagen(oferta.imagen, { ancho: 80 })} alt="" className="h-10 w-14 shrink-0 rounded object-cover" />
                                                 {oferta.titulo}
                                             </div>
                                         </td>
@@ -112,7 +115,7 @@ export default function AdminOfertas() {
                                                 </button>
                                                 <button
                                                     onClick={() => manejarEliminar(oferta)}
-                                                    className="text-fay-gray hover:text-fay-accent-light"
+                                                    className="text-fay-gray hover:text-fay-danger-light"
                                                 >
                                                     <Trash2 size={15} />
                                                 </button>

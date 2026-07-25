@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { useProductosAdminStore } from "@/store/useProductosAdminStore";
 import { useOfertasAdminStore } from "@/store/useOfertasAdminStore";
 import { ofertaEstaActiva } from "@/lib/utils";
@@ -33,6 +34,9 @@ export default function AdminDashboard() {
 
     return (
         <div>
+            <Helmet>
+                <title>Dashboard · Panel admin</title>
+            </Helmet>
             <h1 className="text-2xl font-semibold">Dashboard</h1>
             <p className="mt-1 text-sm text-fay-gray">Resumen general de la tienda.</p>
 

@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { Plus, Pencil, Trash2, Tag } from "lucide-react";
 import { useCategorias } from "@/hooks/useCategorias";
 import { useAuthStore } from "@/store/useAuthStore";
 import { api } from "@/lib/api";
+import { Button } from "@/components/ui/Button";
 import CategoriaFormModal from "@/components/admin/CategoriaFormModal";
 import { confirmarAccion } from "@/store/useConfirmStore";
 import type { CategoriaProducto, Producto, Oferta } from "@/types";
@@ -72,6 +74,9 @@ export default function AdminCategorias() {
 
     return (
         <div>
+            <Helmet>
+                <title>Categorías · Panel admin</title>
+            </Helmet>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                     <h1 className="text-2xl font-semibold">Categorías</h1>
@@ -79,16 +84,13 @@ export default function AdminCategorias() {
                         Administra las categorías disponibles para tus productos y ofertas.
                     </p>
                 </div>
-                <button
-                    onClick={abrirNueva}
-                    className="flex items-center gap-2 self-start rounded-lg bg-fay-accent px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.02] sm:self-auto"
-                >
+                <Button size="sm" onClick={abrirNueva} className="self-start sm:self-auto">
                     <Plus size={16} />
                     Nueva categoría
-                </button>
+                </Button>
             </div>
 
-            {error && <p className="mt-3 text-xs text-fay-accent-light">{error}</p>}
+            {error && <p className="mt-3 text-xs text-fay-danger-light">{error}</p>}
 
             {cargando ? (
                 <p className="mt-6 text-sm text-fay-gray">Cargando...</p>
@@ -120,7 +122,7 @@ export default function AdminCategorias() {
                                                 </button>
                                                 <button
                                                     onClick={() => manejarEliminar(c)}
-                                                    className="text-fay-gray hover:text-fay-accent-light"
+                                                    className="text-fay-gray hover:text-fay-danger-light"
                                                 >
                                                     <Trash2 size={15} />
                                                 </button>

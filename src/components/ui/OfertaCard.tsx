@@ -1,5 +1,7 @@
 import { Link } from "react-router-dom";
 import type { Oferta } from "@/types";
+import { optimizarImagen } from "@/lib/imagenes";
+import Badge from "@/components/ui/Badge";
 
 export default function OfertaCard({ oferta }: { oferta: Oferta }) {
     const fechaFormateada = new Date(oferta.fechaFin).toLocaleDateString("es-PE", {
@@ -14,14 +16,15 @@ export default function OfertaCard({ oferta }: { oferta: Oferta }) {
         >
             <div className="relative aspect-[16/9] overflow-hidden">
                 <img
-                    src={oferta.imagen}
+                    src={optimizarImagen(oferta.imagen, { ancho: 600 })}
                     alt={oferta.titulo}
+                    loading="lazy"
                     className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 {oferta.descuento > 0 && (
-                    <span className="absolute right-3 top-3 rounded-md bg-fay-accent px-2 py-1 text-xs font-medium text-white">
+                    <Badge variant="accent" className="absolute right-3 top-3 text-xs">
                         -{oferta.descuento}%
-                    </span>
+                    </Badge>
                 )}
             </div>
             <div className="p-4">

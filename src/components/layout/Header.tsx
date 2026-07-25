@@ -20,6 +20,9 @@ export default function Header() {
     const enProductos = location.pathname === "/productos";
     const busquedaUrl = enProductos ? searchParams.get("buscar") ?? "" : "";
 
+    const esActivo = (href: string) =>
+        href === "/" ? location.pathname === "/" : location.pathname.startsWith(href);
+
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [busquedaAbierta, setBusquedaAbierta] = useState(false);
     const [query, setQuery] = useState(busquedaUrl);
@@ -79,7 +82,10 @@ export default function Header() {
                         <Link
                             key={link.href}
                             to={link.href}
-                            className="text-sm text-neutral-400 transition-colors hover:text-white"
+                            className={cn(
+                                "text-sm transition-colors hover:text-white",
+                                esActivo(link.href) ? "text-white" : "text-neutral-400"
+                            )}
                         >
                             {link.label}
                         </Link>
@@ -114,7 +120,7 @@ export default function Header() {
                     >
                         <ShoppingBag size={19} />
                         {cantidadTotal > 0 && (
-                            <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-violet-500 text-[10px] font-medium text-white">
+                            <span className="absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-fay-accent text-[10px] font-medium text-white">
                                 {cantidadTotal}
                             </span>
                         )}
@@ -159,7 +165,10 @@ export default function Header() {
                             key={link.href}
                             to={link.href}
                             onClick={() => setMenuAbierto(false)}
-                            className="py-2 text-sm text-neutral-400 transition-colors hover:text-white"
+                            className={cn(
+                                "py-2 text-sm transition-colors hover:text-white",
+                                esActivo(link.href) ? "text-white" : "text-neutral-400"
+                            )}
                         >
                             {link.label}
                         </Link>

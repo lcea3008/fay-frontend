@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /fay-admin-access
+
+Sitemap: https://tu-dominio.com/sitemap.xml

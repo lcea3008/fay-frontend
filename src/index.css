@@ -6,11 +6,14 @@
   --fay-surface-2: #1c1c1c;
   --fay-white: #ffffff;
   --fay-gray: #a3a3a3;
-  --fay-accent: #8b5cf6;
-  --fay-accent-dark: #6d28d9;
-  --fay-accent-light: #c9a8fa;
-  --fay-accent-tint: #1b1424;
+  --fay-accent: #f72585;
+  --fay-accent-dark: #b5179e;
+  --fay-accent-light: #4cc9f0;
+  --fay-accent-tint: #1a0f24;
   --fay-border: rgba(255, 255, 255, 0.1);
+  --fay-danger: #ef4444;
+  --fay-danger-light: #f87171;
+  --fay-danger-tint: #2a1414;
 }
 
 @theme inline {
@@ -23,6 +26,9 @@
   --color-fay-accent-dark: var(--fay-accent-dark);
   --color-fay-accent-light: var(--fay-accent-light);
   --color-fay-accent-tint: var(--fay-accent-tint);
+  --color-fay-danger: var(--fay-danger);
+  --color-fay-danger-light: var(--fay-danger-light);
+  --color-fay-danger-tint: var(--fay-danger-tint);
 }
 
 body {

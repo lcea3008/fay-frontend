@@ -2,11 +2,16 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { ItemCarrito, Producto } from "@/types";
 import { api } from "@/lib/api";
+import { mostrarToast } from "@/store/useToastStore";
+
+interface OpcionesAgregar {
+    abrirCarrito?: boolean;
+}
 
 interface CartState {
     items: ItemCarrito[];
     abierto: boolean;
-    agregarItem: (producto: Producto, talla: string, color: string, cantidad?: number) => void;
+    agregarItem: (producto: Producto, talla: string, color: string, cantidad?: number, opciones?: OpcionesAgregar) => void;
     quitarItem: (productoId: string, talla: string, color: string) => void;
     actualizarCantidad: (productoId: string, talla: string, color: string, cantidad: number) => void;
     vaciarCarrito: () => void;
@@ -22,7 +27,8 @@ export const useCartStore = create<CartState>()(
             items: [],
             abierto: false,
 
-            agregarItem: (producto, talla, color, cantidad = 1) => {
+            agregarItem: (producto, talla, color, cantidad = 1, opciones = {}) => {
+                const { abrirCarrito = true } = opciones;
                 api.post(`/productos/${producto.id}/popularidad`, {}).catch(() => { });
 
                 set((state) => {
@@ -34,14 +40,16 @@ export const useCartStore = create<CartState>()(
                             items: state.items.map((i) =>
                                 i === existente ? { ...i, cantidad: i.cantidad + cantidad } : i
                             ),
-                            abierto: true,
+                            abierto: abrirCarrito ? true : state.abierto,
                         };
                     }
                     return {
                         items: [...state.items, { producto, talla, color, cantidad }],
-                        abierto: true,
+                        abierto: abrirCarrito ? true : state.abierto,
                     };
                 });
+
+                mostrarToast(`${producto.nombre} agregado al carrito`, "exito");
             },
 
             quitarItem: (productoId, talla, color) => {

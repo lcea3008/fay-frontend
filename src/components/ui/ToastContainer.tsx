@@ -3,7 +3,7 @@ import { X } from "lucide-react";
 import { useToastStore, type TipoToast } from "@/store/useToastStore";
 
 const ESTILOS_TIPO: Record<TipoToast, string> = {
-    error: "border-fay-accent/40 bg-fay-accent-tint text-fay-accent-light",
+    error: "border-fay-danger/40 bg-fay-danger-tint text-fay-danger-light",
     exito: "border-emerald-500/30 bg-emerald-500/10 text-emerald-300",
     info: "border-fay-border bg-fay-surface text-white",
 };

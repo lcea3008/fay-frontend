@@ -1,6 +1,12 @@
+import { Helmet } from "react-helmet-async";
+
 export default function Nosotros() {
     return (
         <main className="mx-auto max-w-7xl px-5 py-14 md:px-8">
+            <Helmet>
+                <title>Nosotros · FAY</title>
+                <meta name="description" content="Conocé FAY: activewear femenino diseñado para cuerpos reales en movimiento, con tejidos técnicos y actitud." />
+            </Helmet>
             <div className="grid items-center gap-10 md:grid-cols-2">
                 <div>
                     <p className="mb-3 text-xs font-medium tracking-[0.2em] text-fay-accent-light">

@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
+import { Helmet } from "react-helmet-async";
 import { TrendingUp } from "lucide-react";
 import { api } from "@/lib/api";
 import { formatearPrecio } from "@/lib/utils";
+import { optimizarImagen } from "@/lib/imagenes";
 import type { Producto } from "@/types";
 
 export default function AdminPopulares() {
@@ -17,6 +19,9 @@ export default function AdminPopulares() {
 
     return (
         <div>
+            <Helmet>
+                <title>Populares · Panel admin</title>
+            </Helmet>
             <h1 className="text-2xl font-semibold">Productos populares</h1>
             <p className="mt-1 text-sm text-fay-gray">
                 Productos más agregados al carrito por los visitantes.
@@ -49,7 +54,7 @@ export default function AdminPopulares() {
                                         <td className="px-4 py-3 text-fay-gray">{i + 1}</td>
                                         <td className="px-4 py-3">
                                             <div className="flex items-center gap-3">
-                                                <img src={producto.imagenes[0]} alt={producto.nombre} className="h-10 w-8 shrink-0 rounded object-cover" />
+                                                <img src={optimizarImagen(producto.imagenes[0], { ancho: 60 })} alt={producto.nombre} className="h-10 w-8 shrink-0 rounded object-cover" />
                                                 {producto.nombre}
                                             </div>
                                         </td>

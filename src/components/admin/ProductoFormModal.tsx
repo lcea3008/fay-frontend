@@ -4,7 +4,12 @@ import type { Producto } from "@/types";
 import { useCategorias } from "@/hooks/useCategorias";
 import { useAuthStore } from "@/store/useAuthStore";
 import { subirImagen } from "@/lib/uploads";
+import { buscarHexPorNombre, buscarNombrePorHex } from "@/lib/colores";
+import { optimizarImagen } from "@/lib/imagenes";
 import { mostrarToast } from "@/store/useToastStore";
+import { Input, Textarea, Select } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
+import Chip from "@/components/ui/Chip";
 
 interface Props {
     productoInicial?: Producto;
@@ -49,6 +54,13 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
     );
 
     const [tallaCustom, setTallaCustom] = useState("");
+    const [subiendoColorIndex, setSubiendoColorIndex] = useState<number | null>(null);
+
+    // Por fila de color: si el usuario ya editó ese campo a mano, no lo pisamos
+    // con la sugerencia automática del campo opuesto (nombre <-> hex).
+    const [coloresManual, setColoresManual] = useState<{ nombre: boolean; hex: boolean }[]>(
+        productoInicial ? productoInicial.colores.map(() => ({ nombre: true, hex: true })) : []
+    );
 
     // --- Imágenes ---
     const agregarImagenPorLink = () => {
@@ -110,17 +122,59 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
     // --- Colores ---
     const agregarColor = () => {
         setForm((f) => ({ ...f, colores: [...f.colores, { nombre: "", hex: "#0a0a0a" }] }));
+        setColoresManual((m) => [...m, { nombre: false, hex: false }]);
     };
 
     const actualizarColor = (index: number, campo: "nombre" | "hex", valor: string) => {
+        const manual = coloresManual[index];
+
         setForm((f) => ({
             ...f,
-            colores: f.colores.map((c, i) => (i === index ? { ...c, [campo]: valor } : c)),
+            colores: f.colores.map((c, i) => {
+                if (i !== index) return c;
+                if (campo === "nombre") {
+                    const hexSugerido = !manual?.hex ? buscarHexPorNombre(valor) : null;
+                    return { ...c, nombre: valor, ...(hexSugerido ? { hex: hexSugerido } : {}) };
+                }
+                const nombreSugerido = !manual?.nombre ? buscarNombrePorHex(valor) : null;
+                return { ...c, hex: valor, ...(nombreSugerido ? { nombre: nombreSugerido } : {}) };
+            }),
         }));
+
+        setColoresManual((m) => m.map((flag, i) => (i === index ? { ...flag, [campo]: true } : flag)));
     };
 
     const eliminarColor = (index: number) => {
         setForm((f) => ({ ...f, colores: f.colores.filter((_, i) => i !== index) }));
+        setColoresManual((m) => m.filter((_, i) => i !== index));
+    };
+
+    const subirImagenColor = async (index: number, archivo: File) => {
+        if (!archivo.type.startsWith("image/")) {
+            mostrarToast("Selecciona un archivo de imagen válido.", "error");
+            return;
+        }
+        if (!token) return;
+
+        setSubiendoColorIndex(index);
+        try {
+            const url = await subirImagen(archivo, token);
+            setForm((f) => ({
+                ...f,
+                colores: f.colores.map((c, i) => (i === index ? { ...c, imagen: url } : c)),
+            }));
+        } catch {
+            mostrarToast("No se pudo subir la imagen del color. Intenta de nuevo.", "error");
+        } finally {
+            setSubiendoColorIndex(null);
+        }
+    };
+
+    const quitarImagenColor = (index: number) => {
+        setForm((f) => ({
+            ...f,
+            colores: f.colores.map((c, i) => (i === index ? { ...c, imagen: undefined } : c)),
+        }));
     };
 
     const manejarSubmit = (e: FormEvent) => {
@@ -136,6 +190,10 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
         }
         if (form.colores.length === 0 || form.colores.some((c) => !c.nombre)) {
             mostrarToast("Agrega al menos un color con nombre.", "error");
+            return;
+        }
+        if (form.colores.length > 1 && form.colores.some((c) => !c.imagen)) {
+            mostrarToast("Con más de un color, cada uno necesita su propia imagen.", "error");
             return;
         }
         if (!form.categoria) {
@@ -159,87 +217,77 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
                 </div>
 
                 <form onSubmit={manejarSubmit} className="space-y-4">
-                    <div>
-                        <label className="mb-1 block text-xs text-fay-gray">Nombre</label>
-                        <input
-                            required
-                            value={form.nombre}
-                            onChange={(e) => {
-                                const nombre = e.target.value;
-                                setForm((f) => ({
-                                    ...f,
-                                    nombre,
-                                    slug: slugEditadoManualmente ? f.slug : generarSlug(nombre),
-                                }));
-                            }}
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                        />
-                    </div>
+                    <Input
+                        label="Nombre"
+                        required
+                        value={form.nombre}
+                        onChange={(e) => {
+                            const nombre = e.target.value;
+                            setForm((f) => ({
+                                ...f,
+                                nombre,
+                                slug: slugEditadoManualmente ? f.slug : generarSlug(nombre),
+                            }));
+                        }}
+                        className="bg-fay-black"
+                    />
 
-                    <div>
-                        <label className="mb-1 block text-xs text-fay-gray">Slug (URL)</label>
-                        <input
-                            required
-                            value={form.slug}
-                            onChange={(e) => {
-                                setSlugEditadoManualmente(true);
-                                setForm({ ...form, slug: e.target.value });
-                            }}
-                            placeholder="legging-seamless-move"
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                        />
-                    </div>
+                    <Input
+                        label="Slug (URL)"
+                        required
+                        value={form.slug}
+                        onChange={(e) => {
+                            setSlugEditadoManualmente(true);
+                            setForm({ ...form, slug: e.target.value });
+                        }}
+                        placeholder="legging-seamless-move"
+                        className="bg-fay-black"
+                    />
 
-                    <div>
-                        <label className="mb-1 block text-xs text-fay-gray">Descripción</label>
-                        <textarea
-                            required
-                            rows={2}
-                            value={form.descripcion}
-                            onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                        />
-                    </div>
+                    <Textarea
+                        label="Descripción"
+                        required
+                        rows={2}
+                        value={form.descripcion}
+                        onChange={(e) => setForm({ ...form, descripcion: e.target.value })}
+                        className="bg-fay-black"
+                    />
 
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <label className="mb-1 block text-xs text-fay-gray">Precio (S/)</label>
-                            <input
-                                required
-                                type="number"
-                                min={0}
-                                value={form.precio}
-                                onChange={(e) => setForm({ ...form, precio: Number(e.target.value) })}
-                                className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                            />
-                        </div>
-                        <div>
-                            <label className="mb-1 block text-xs text-fay-gray">Stock</label>
-                            <input
-                                required
-                                type="number"
-                                min={0}
-                                value={form.stock}
-                                onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
-                                className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                            />
-                        </div>
+                        <Input
+                            label="Precio (S/)"
+                            required
+                            type="number"
+                            min={0}
+                            value={form.precio}
+                            onChange={(e) => setForm({ ...form, precio: Number(e.target.value) })}
+                            className="bg-fay-black"
+                        />
+                        <Input
+                            label="Stock"
+                            required
+                            type="number"
+                            min={0}
+                            value={form.stock}
+                            onChange={(e) => setForm({ ...form, stock: Number(e.target.value) })}
+                            className="bg-fay-black"
+                        />
                     </div>
 
                     {/* Categoría, ahora desde la API */}
                     <div>
-                        <label className="mb-1 block text-xs text-fay-gray">Categoría</label>
-                        <select
+                        <Select
+                            label="Categoría"
                             required
                             value={form.categoria}
                             onChange={(e) => setForm({ ...form, categoria: e.target.value })}
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
+                            className="bg-fay-black"
                         >
                             <option value="">Selecciona una categoría</option>
                             {categorias.map((c) => (
                                 <option key={c.slug} value={c.slug}>{c.nombre}</option>
                             ))}
-                        </select>
+                        </Select>
                         {categorias.length === 0 && (
                             <p className="mt-1 text-xs text-fay-gray">
                                 No hay categorías aún — créalas primero en la sección "Categorías" del menú.
@@ -252,17 +300,14 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
                         <label className="mb-1.5 block text-xs text-fay-gray">Tallas disponibles</label>
                         <div className="flex flex-wrap gap-2">
                             {TALLAS_SUGERIDAS.map((talla) => (
-                                <button
+                                <Chip
                                     key={talla}
-                                    type="button"
+                                    size="sm"
+                                    active={form.tallas.includes(talla)}
                                     onClick={() => toggleTallaSugerida(talla)}
-                                    className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${form.tallas.includes(talla)
-                                        ? "border-fay-accent bg-fay-accent text-white"
-                                        : "border-fay-border text-fay-gray hover:border-fay-accent/50"
-                                        }`}
                                 >
                                     {talla}
-                                </button>
+                                </Chip>
                             ))}
                         </div>
 
@@ -317,32 +362,77 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
 
                         <div className="space-y-2">
                             {form.colores.map((color, i) => (
-                                <div key={i} className="flex items-center gap-2">
-                                    <input
-                                        type="color"
-                                        value={color.hex}
-                                        onChange={(e) => actualizarColor(i, "hex", e.target.value)}
-                                        className="h-8 w-8 shrink-0 cursor-pointer rounded-md border border-fay-border bg-fay-black"
-                                    />
-                                    <input
-                                        value={color.nombre}
-                                        onChange={(e) => actualizarColor(i, "nombre", e.target.value)}
-                                        placeholder="Nombre del color (ej. Negro)"
-                                        className="flex-1 rounded-lg border border-fay-border bg-fay-black px-3 py-1.5 text-xs outline-none focus:border-fay-accent"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => eliminarColor(i)}
-                                        className="shrink-0 text-fay-gray hover:text-fay-accent-light"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
+                                <div key={i} className="space-y-2 rounded-lg border border-fay-border p-2">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="color"
+                                            value={color.hex}
+                                            onChange={(e) => actualizarColor(i, "hex", e.target.value)}
+                                            className="h-8 w-8 shrink-0 cursor-pointer rounded-md border border-fay-border bg-fay-black"
+                                        />
+                                        <input
+                                            value={color.nombre}
+                                            onChange={(e) => actualizarColor(i, "nombre", e.target.value)}
+                                            placeholder="Nombre del color (ej. Negro)"
+                                            className="flex-1 rounded-lg border border-fay-border bg-fay-black px-3 py-1.5 text-xs outline-none focus:border-fay-accent"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => eliminarColor(i)}
+                                            className="shrink-0 text-fay-gray hover:text-fay-danger-light"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+
+                                    <div className="flex items-center gap-2 pl-1">
+                                        <div className="h-10 w-8 shrink-0 overflow-hidden rounded bg-fay-black">
+                                            {color.imagen && (
+                                                <img src={optimizarImagen(color.imagen, { ancho: 60 })} alt="" className="h-full w-full object-cover" />
+                                            )}
+                                        </div>
+                                        <label
+                                            className={`flex items-center gap-1 text-xs text-fay-accent-light hover:text-white ${subiendoColorIndex === i ? "pointer-events-none opacity-50" : "cursor-pointer"}`}
+                                        >
+                                            {subiendoColorIndex === i ? (
+                                                <Loader2 size={12} className="animate-spin" />
+                                            ) : (
+                                                <Upload size={12} />
+                                            )}
+                                            {color.imagen ? "Cambiar imagen" : "Agregar imagen"}
+                                            <input
+                                                type="file"
+                                                accept="image/*"
+                                                className="hidden"
+                                                disabled={subiendoColorIndex === i}
+                                                onChange={(e) => {
+                                                    const archivo = e.target.files?.[0];
+                                                    e.target.value = "";
+                                                    if (archivo) subirImagenColor(i, archivo);
+                                                }}
+                                            />
+                                        </label>
+                                        {color.imagen && (
+                                            <button
+                                                type="button"
+                                                onClick={() => quitarImagenColor(i)}
+                                                className="text-xs text-fay-gray hover:text-fay-danger-light"
+                                            >
+                                                Quitar
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             ))}
                             {form.colores.length === 0 && (
                                 <p className="text-xs text-fay-gray">Aún no agregaste colores.</p>
                             )}
                         </div>
+                        {form.colores.length > 1 && (
+                            <p className="mt-1.5 text-xs text-fay-gray">
+                                Con más de un color, cada uno necesita su propia imagen.
+                            </p>
+                        )}
                     </div>
 
                     {/* Imágenes múltiples */}
@@ -383,7 +473,7 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
                             {form.imagenes.map((img, i) => (
                                 <div key={i} className="flex items-center gap-2">
                                     <div className="h-10 w-8 shrink-0 overflow-hidden rounded bg-fay-black">
-                                        {img && <img src={img} alt="" className="h-full w-full object-cover" />}
+                                        {img && <img src={optimizarImagen(img, { ancho: 60 })} alt="" className="h-full w-full object-cover" />}
                                     </div>
                                     <input
                                         value={img}
@@ -394,7 +484,7 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
                                     <button
                                         type="button"
                                         onClick={() => eliminarImagen(i)}
-                                        className="shrink-0 text-fay-gray hover:text-fay-accent-light"
+                                        className="shrink-0 text-fay-gray hover:text-fay-danger-light"
                                     >
                                         <Trash2 size={14} />
                                     </button>
@@ -406,13 +496,9 @@ export default function ProductoFormModal({ productoInicial, onGuardar, onCerrar
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={subiendoImagen}
-                        className="mt-2 w-full rounded-lg bg-fay-accent py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-50"
-                    >
+                    <Button type="submit" disabled={subiendoImagen || subiendoColorIndex !== null} fullWidth className="mt-2">
                         Guardar producto
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>

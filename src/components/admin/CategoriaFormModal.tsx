@@ -1,6 +1,8 @@
 import { useState, type FormEvent } from "react";
 import { X } from "lucide-react";
 import type { CategoriaProducto } from "@/types";
+import { Input } from "@/components/ui/Input";
+import { Button } from "@/components/ui/Button";
 
 interface Props {
     categoriaInicial?: CategoriaProducto;
@@ -31,17 +33,15 @@ export default function CategoriaFormModal({ categoriaInicial, onGuardar, onCerr
                 </div>
 
                 <form onSubmit={manejarSubmit} className="space-y-3">
-                    <div>
-                        <label className="mb-1 block text-xs text-fay-gray">Nombre</label>
-                        <input
-                            required
-                            autoFocus
-                            value={nombre}
-                            onChange={(e) => setNombre(e.target.value)}
-                            placeholder="ej. Accesorios"
-                            className="w-full rounded-lg border border-fay-border bg-fay-black px-3 py-2 text-sm outline-none focus:border-fay-accent"
-                        />
-                    </div>
+                    <Input
+                        label="Nombre"
+                        required
+                        autoFocus
+                        value={nombre}
+                        onChange={(e) => setNombre(e.target.value)}
+                        placeholder="ej. Accesorios"
+                        className="bg-fay-black"
+                    />
 
                     {categoriaInicial && (
                         <p className="text-xs text-fay-gray">
@@ -49,13 +49,9 @@ export default function CategoriaFormModal({ categoriaInicial, onGuardar, onCerr
                         </p>
                     )}
 
-                    <button
-                        type="submit"
-                        disabled={guardando}
-                        className="mt-2 w-full rounded-lg bg-fay-accent py-2.5 text-sm font-medium text-white transition-transform hover:scale-[1.01] disabled:opacity-60"
-                    >
+                    <Button type="submit" loading={guardando} fullWidth className="mt-2">
                         {guardando ? "Guardando..." : "Guardar"}
-                    </button>
+                    </Button>
                 </form>
             </div>
         </div>

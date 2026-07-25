@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { useConfirmStore } from "@/store/useConfirmStore";
+import { Button } from "@/components/ui/Button";
 
 export default function ConfirmDialog() {
     const { abierto, titulo, mensaje, textoConfirmar, responder } = useConfirmStore();
@@ -25,18 +26,12 @@ export default function ConfirmDialog() {
                         <h2 className="text-base font-medium">{titulo}</h2>
                         <p className="mt-2 text-sm text-fay-gray">{mensaje}</p>
                         <div className="mt-6 flex justify-end gap-3">
-                            <button
-                                onClick={() => responder(false)}
-                                className="rounded-lg px-4 py-2 text-sm text-fay-gray hover:text-white"
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => responder(false)}>
                                 Cancelar
-                            </button>
-                            <button
-                                onClick={() => responder(true)}
-                                className="rounded-lg bg-fay-accent px-4 py-2 text-sm font-medium text-white transition-transform hover:scale-[1.02]"
-                            >
+                            </Button>
+                            <Button variant="danger" size="sm" onClick={() => responder(true)}>
                                 {textoConfirmar}
-                            </button>
+                            </Button>
                         </div>
                     </motion.div>
                 </>

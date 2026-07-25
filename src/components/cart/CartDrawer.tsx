@@ -2,14 +2,17 @@ import { AnimatePresence, motion } from "framer-motion";
 import { X, Minus, Plus, Trash2 } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
 import { formatearPrecio } from "@/lib/utils";
+import { optimizarImagen } from "@/lib/imagenes";
 import { abrirWhatsappConPedido } from "@/lib/whatsapp";
+import { useConfiguracion } from "@/hooks/useConfiguracion";
 
 export default function CartDrawer() {
     const { items, abierto, cerrarCarrito, actualizarCantidad, quitarItem, total } =
         useCartStore();
+    const { configuracion } = useConfiguracion();
 
     const manejarFinalizarCompra = () => {
-        abrirWhatsappConPedido(items, total());
+        abrirWhatsappConPedido(items, total(), configuracion?.whatsapp);
     };
 
     return (
@@ -48,8 +51,9 @@ export default function CartDrawer() {
                                         <li key={`${item.producto.id}-${item.talla}-${item.color}`} className="flex gap-3">
                                             <div className="relative h-20 w-16 shrink-0 overflow-hidden rounded-lg bg-fay-surface">
                                                 <img
-                                                    src={item.producto.imagenes[0]}
+                                                    src={optimizarImagen(item.producto.imagenes[0], { ancho: 100 })}
                                                     alt={item.producto.nombre}
+                                                    loading="lazy"
                                                     className="h-full w-full object-cover"
                                                 />
                                             </div>

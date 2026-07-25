@@ -15,6 +15,7 @@ import AdminOfertas from "@/pages/admin/AdminOfertas";
 import AdminPopulares from "@/pages/admin/AdminPopulares";
 import NotFound from "@/pages/NotFound";
 import AdminCategorias from "@/pages/admin/AdminCategorias";
+import AdminConfiguracion from "@/pages/admin/AdminConfiguracion";
 
 export const router = createBrowserRouter([
     {
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
             { path: "/fay-admin-access/ofertas", element: <AdminOfertas /> },
             { path: "/fay-admin-access/populares", element: <AdminPopulares /> },
             { path: "/fay-admin-access/categorias", element: <AdminCategorias /> },
+            { path: "/fay-admin-access/configuracion", element: <AdminConfiguracion /> },
         ],
     },
 ]);

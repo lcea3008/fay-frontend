@@ -3,6 +3,12 @@
 // cada interfaz se corresponderá con una tabla/colección cuando se
 // construya el backend con Express.
 
+export interface ColorProducto {
+    nombre: string;
+    hex: string;
+    imagen?: string | null;
+}
+
 export interface Producto {
     id: string;
     nombre: string;
@@ -11,7 +17,7 @@ export interface Producto {
     precioOferta?: number;
     categoria: string;
     tallas: string[];
-    colores: { nombre: string; hex: string }[];
+    colores: ColorProducto[];
     imagenes: string[];
     stock: number;
     destacado?: boolean;
@@ -52,4 +58,11 @@ export interface Usuario {
     nombre: string;
     email: string;
     rol: "admin" | "editor";
+}
+
+export interface Configuracion {
+    id: string;
+    whatsapp: string | null;
+    instagram: string | null;
+    tiktok: string | null;
 }

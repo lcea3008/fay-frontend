@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import { LinkButton } from "@/components/ui/Button";
 
 export default function Hero() {
     return (
@@ -24,13 +25,10 @@ export default function Hero() {
                         sin límites con activewear pensado para tu cuerpo en movimiento.
                     </p>
                     <div className="mt-8 flex items-center gap-4">
-                        <Link
-                            to="/productos"
-                            className="group inline-flex items-center gap-2 rounded-lg bg-fay-accent px-6 py-3 text-sm font-medium text-white transition-transform hover:scale-[1.02]"
-                        >
+                        <LinkButton to="/productos" size="lg" className="group">
                             Ver colección
                             <ArrowRight size={16} className="transition-transform group-hover:translate-x-0.5" />
-                        </Link>
+                        </LinkButton>
                         <Link
                             to="/nosotros"
                             className="text-sm text-fay-gray transition-colors hover:text-white"
