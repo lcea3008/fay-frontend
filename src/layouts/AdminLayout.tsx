@@ -4,6 +4,7 @@ import { Helmet } from "react-helmet-async";
 import { AnimatePresence, motion } from "framer-motion";
 import { LayoutDashboard, Shirt, Tag, BadgePercent, TrendingUp, Settings, LogOut, Menu, X } from "lucide-react";
 import { useAuthStore } from "@/store/useAuthStore";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import ToastContainer from "@/components/ui/ToastContainer";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import logoFay from "@/assets/logo-fay.png";
@@ -133,13 +134,19 @@ export default function AdminLayout() {
                     })}
                 </nav>
 
-                <button
-                    onClick={manejarLogout}
-                    className="mt-auto flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-fay-gray transition-colors hover:bg-fay-surface hover:text-white"
-                >
-                    <LogOut size={16} />
-                    Cerrar sesión
-                </button>
+                <div className="mt-auto space-y-3 border-t border-fay-border pt-4">
+                    <div className="flex items-center justify-between">
+                        <span className="text-xs font-semibold text-fay-gray">TEMA</span>
+                        <ThemeToggle />
+                    </div>
+                    <button
+                        onClick={manejarLogout}
+                        className="w-full flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm text-fay-gray transition-colors hover:bg-fay-surface hover:text-white"
+                    >
+                        <LogOut size={16} />
+                        Cerrar sesión
+                    </button>
+                </div>
             </aside>
 
             <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">

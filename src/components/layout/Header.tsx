@@ -2,6 +2,7 @@ import { Link, useNavigate, useLocation, useSearchParams } from "react-router-do
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Search, ShoppingBag, Menu, X } from "lucide-react";
 import { useCartStore } from "@/store/useCartStore";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { cn } from "@/lib/utils";
 import logoFay from "@/assets/logo-fay.png";
 
@@ -106,6 +107,7 @@ export default function Header() {
                 </form>
 
                 <div className="ml-auto flex shrink-0 items-center gap-4">
+                    <ThemeToggle />
                     <button
                         aria-label={busquedaAbierta ? "Cerrar búsqueda" : "Buscar"}
                         onClick={() => setBusquedaAbierta((v) => !v)}

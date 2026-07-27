@@ -41,14 +41,15 @@ export default function Hero() {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.97 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.6 }}
-                    className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-fay-surface"
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                    className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-fay-surface shadow-2xl"
                 >
                     <img
                         src="https://images.unsplash.com/photo-1518611012118-696072aa579a?w=1000&q=80"
                         alt="Mujer usando activewear FAY"
-                        className="h-full w-full object-cover"
+                        className="h-full w-full object-cover transition-transform duration-500 hover:scale-105"
                     />
+                    <div className="absolute inset-0 bg-gradient-to-t from-fay-black/20 via-transparent to-transparent" />
                 </motion.div>
             </div>
         </section>

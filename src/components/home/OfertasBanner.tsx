@@ -47,13 +47,13 @@ export default function OfertasBanner() {
             onMouseLeave={() => setPausado(false)}
             aria-label="Ofertas activas"
         >
-            <div className="relative overflow-hidden rounded-2xl border border-fay-accent/30 bg-fay-accent-tint">
+            <div className="relative overflow-hidden rounded-2xl border border-fay-accent/40 bg-gradient-to-r from-fay-accent-tint via-fay-accent-tint/80 to-fay-accent-tint shadow-lg shadow-fay-accent/10">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={oferta.id}
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -4 }}
                         transition={{ duration: 0.4 }}
                         className="grid items-center gap-4 p-5 md:grid-cols-[auto_1fr_auto] md:p-6"
                     >

@@ -110,7 +110,7 @@ export default function ProductCard({ producto }: { producto: Producto }) {
 
             {tieneVariantesColor && (
                 <div
-                    className="mt-2 flex flex-wrap gap-1.5"
+                    className="mt-3 flex flex-wrap gap-2"
                     onMouseEnter={() => setCarruselPausado(true)}
                     onMouseLeave={() => setCarruselPausado(false)}
                 >
@@ -118,11 +118,13 @@ export default function ProductCard({ producto }: { producto: Producto }) {
                         <button
                             key={color.nombre}
                             onClick={() => setColorActivoIdx(i)}
-                            aria-label={color.nombre}
+                            aria-label={`Color: ${color.nombre}`}
                             title={color.nombre}
                             className={cn(
-                                "h-4 w-4 rounded-full border-2 transition-all",
-                                i === colorActivoIdx ? "border-fay-accent scale-110" : "border-fay-border"
+                                "h-5 w-5 rounded-full border-2 transition-all duration-200 hover:scale-125 active:scale-95",
+                                i === colorActivoIdx
+                                    ? "border-fay-accent ring-2 ring-fay-accent/40 ring-offset-2 ring-offset-fay-black scale-110"
+                                    : "border-fay-border/60 hover:border-fay-accent/60"
                             )}
                             style={{ backgroundColor: color.hex }}
                         />

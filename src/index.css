@@ -1,19 +1,53 @@
 @import "tailwindcss";
 
+/* Tema Oscuro (por defecto) */
 :root {
   --fay-black: #0a0a0a;
   --fay-surface: #141414;
   --fay-surface-2: #1c1c1c;
   --fay-white: #ffffff;
   --fay-gray: #a3a3a3;
-  --fay-accent: #f72585;
-  --fay-accent-dark: #b5179e;
-  --fay-accent-light: #4cc9f0;
-  --fay-accent-tint: #1a0f24;
+  /* Rose/Coral sofisticado - visibles en ambos temas */
+  --fay-accent: #d97757;
+  /* Ligero en tema oscuro */
+  --fay-accent-dark: #b85534;
+  /* Más oscuro para botones */
+  --fay-accent-light: #e8b9aa;
+  /* Variación clara */
+  --fay-accent-tint: #2a1f1a;
   --fay-border: rgba(255, 255, 255, 0.1);
   --fay-danger: #ef4444;
   --fay-danger-light: #f87171;
   --fay-danger-tint: #2a1414;
+}
+
+/* Tema Claro - Colores ajustados para contraste WCAG */
+:root.light {
+  --fay-black: #f8f7f6;
+  /* Fondo claro */
+  --fay-surface: #ffffff;
+  /* Superficies blancas */
+  --fay-surface-2: #f3f2f1;
+  /* Superficies grises claras */
+  --fay-white: #0a0a0a;
+  /* Texto muy oscuro */
+  --fay-gray: #4b5563;
+  /* Gris oscuro para mejor contraste */
+  /* Colores más oscuros para contraste visible contra blanco */
+  --fay-accent: #a84d2a;
+  /* Rose/coral OSCURO - visible contra blanco */
+  --fay-accent-dark: #8a3e1f;
+  /* Más oscuro aún */
+  --fay-accent-light: #d97757;
+  /* Variación clara del rose */
+  --fay-accent-tint: #f5e8e3;
+  /* Tint claro */
+  --fay-border: rgba(0, 0, 0, 0.1);
+  --fay-danger: #991b1b;
+  /* Rojo más oscuro */
+  --fay-danger-light: #dc2626;
+  /* Rojo medio */
+  --fay-danger-tint: #fee2e2;
 }
 
 @theme inline {
@@ -34,6 +68,14 @@
 body {
   background: var(--fay-black);
   color: var(--fay-white);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Mejora transición al cambiar tema */
+* {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 
 ::selection {
@@ -54,6 +96,7 @@ select:focus-visible {
 
 /* Respeta la preferencia del sistema de reducir animaciones */
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
